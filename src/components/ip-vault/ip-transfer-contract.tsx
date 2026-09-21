@@ -29,7 +29,7 @@ export function IpTransferContract({ company, domain }: { company: string; domai
           <span className="font-mono text-5xl font-medium text-border">/04</span>
           <div>
             <p className="font-mono text-xs text-cyan">GARANTÍA DE PROPIEDAD INTELECTUAL</p>
-            <h2 className="mt-3 text-3xl font-bold sm:text-4xl">La soberanía queda por escrito.</h2>
+            <h2 className="mt-3 text-3xl font-bold sm:text-4xl">Contrato de Propiedad Total</h2>
             <p className="mt-4 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
               Previsualiza las cláusulas esenciales del acuerdo de transferencia preparado para{" "}
               {company}.
