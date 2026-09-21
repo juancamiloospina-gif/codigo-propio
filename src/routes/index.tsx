@@ -50,10 +50,11 @@ function IpVault() {
   const [activeTab, setActiveTab] = useState(0);
   const [seconds, setSeconds] = useState(71 * 3600 + 59 * 60 + 59);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [bookingOpen, setBookingOpen] = useState(false);
 
   const monthly = tools.filter((t) => selected.includes(t.name)).reduce((sum, t) => sum + t.cost, 0) * users;
   const fiveYear = monthly * 60;
-  const sovereignty = Math.max(8, Math.round(84 - selected.length * 8 - Math.min(users / 35, 18)));
+  const sovereignty = Math.max(8, Math.round(88 - selected.length * 8 - years * 2 - Math.min(users / 35, 18)));
   const migration = Math.round(fiveYear * 0.34);
   const company = domain.replace(/^https?:\/\//, "").replace(/^www\./, "").split(".")[0] || "Acme";
 
@@ -126,7 +127,7 @@ function IpVault() {
               <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {tools.map((tool) => {
                   const active = selected.includes(tool.name);
-                  return <button key={tool.name} onClick={() => setSelected(active ? selected.filter((x) => x !== tool.name) : [...selected, tool.name])} className={cn("flex min-h-20 items-center gap-3 rounded-md border p-3 text-left transition-all", active ? "border-primary/60 bg-primary/10 text-foreground shadow-[var(--shadow-primary)]" : "border-border bg-background/30 text-muted-foreground hover:border-cyan/40")}>
+                  return <button key={tool.name} aria-pressed={active} onClick={() => setSelected(active ? selected.filter((x) => x !== tool.name) : [...selected, tool.name])} className={cn("flex min-h-20 items-center gap-3 rounded-md border p-3 text-left transition-all", active ? "border-primary/60 bg-primary/10 text-foreground shadow-[var(--shadow-primary)]" : "border-border bg-background/30 text-muted-foreground hover:border-cyan/40")}>
                     <span className="grid size-9 shrink-0 place-items-center rounded-md bg-secondary font-mono text-[10px] text-cyan">{tool.mark}</span>
                     <span className="text-xs font-semibold leading-4">{tool.name}</span>
                     {active && <Check className="ml-auto size-3.5 text-primary" />}
@@ -177,7 +178,7 @@ function IpVault() {
                 <p className="font-mono text-xs text-muted-foreground">VENTANA DE RESERVA</p>
                 <div className="my-5 font-mono text-4xl font-medium tabular-nums text-primary sm:text-6xl">{time}</div>
                 <p className="mx-auto max-w-md text-sm leading-6 text-muted-foreground">Tu arquitectura soberana está reservada. Al expirar el tiempo, el sandbox se autodestruirá para garantizar la privacidad de tus datos.</p>
-                <Button className="mt-8 w-full max-w-md" size="lg"><KeyRound className="size-4"/> Desbloquear Código y Agendar Sesión</Button>
+                <Button className="mt-8 w-full max-w-md" size="lg" onClick={() => setBookingOpen(true)}><KeyRound className="size-4"/> Desbloquear Código y Agendar Sesión</Button>
               </div>
               <CodeTree />
             </div>
@@ -186,6 +187,7 @@ function IpVault() {
       </section>
 
       <footer className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-10 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12"><Logo /><p>© 2026 IP Vault · Código soberano, por diseño.</p><div className="flex gap-5"><span>Privacidad</span><span>Protocolo</span><span>Seguridad</span></div></footer>
+      {bookingOpen && <div className="fixed inset-0 z-[60] grid place-items-center bg-background/80 p-5 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="booking-title"><div className="glass-panel relative w-full max-w-lg rounded-lg border-primary/50 p-7 shadow-[var(--shadow-primary)]"><Button variant="ghost" size="icon" className="absolute right-4 top-4" aria-label="Cerrar" onClick={() => setBookingOpen(false)}><X className="size-4"/></Button><span className="grid size-12 place-items-center rounded-md border border-primary/40 bg-primary/10"><ShieldCheck className="size-6 text-primary"/></span><p className="mt-6 font-mono text-xs text-primary">SOLICITUD VERIFICADA</p><h2 id="booking-title" className="mt-2 text-2xl font-bold">Tu bóveda está lista para revisión</h2><p className="mt-3 text-sm leading-6 text-muted-foreground">La sesión de arquitectura para <span className="font-semibold capitalize text-foreground">{company}</span> incluirá el mapa de migración y el acceso supervisado al repositorio.</p><div className="mt-6 rounded-md border border-border bg-background/40 p-4 font-mono text-xs text-muted-foreground"><div className="flex justify-between"><span>Estado</span><span className="text-primary">RESERVADO</span></div><div className="mt-3 flex justify-between"><span>Duración estimada</span><span className="text-foreground">45 min</span></div></div><Button className="mt-6 w-full" onClick={() => setBookingOpen(false)}>Confirmar solicitud <ArrowRight className="size-4"/></Button></div></div>}
     </main>
   );
 }
