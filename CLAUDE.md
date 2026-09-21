@@ -39,7 +39,9 @@ tailwind, tsConfigPaths y nitro con target Cloudflare; **no añadir esos plugins
 | `src/routes/index.tsx` | La landing entera: hero, calculadora, simulador, bóveda, captura |
 | `src/routes/admin.tsx` | Panel interno: leads, métricas, generador de enlaces |
 | `src/lib/ip-vault.ts` | Motor de TCO, esquemas zod, persistencia, slugs |
-| `src/lib/ip-vault-admin.ts` | Registro de leads y `buildOutboundUrl` |
+| `src/lib/ip-vault-admin.ts` | Registro de leads en localStorage (para pruebas locales) y `buildOutboundUrl` |
+| `src/lib/lead-notify.ts` | Server function `notifyLead`: manda el lead por correo (Resend, `RESEND_API_KEY`) |
+| `src/lib/admin-auth.ts` | Server functions de `/admin`: código de acceso y sesión, nada en el bundle del cliente |
 | `src/hooks/use-ip-vault-state.ts` | Estado global (reducer + localStorage + contador) |
 | `src/components/ip-vault/scheduling-modal.tsx` | Agendamiento en 2 pasos |
 | `src/components/ip-vault/ip-transfer-contract.tsx` | Contrato de cesión de IP |
@@ -93,16 +95,24 @@ Hecho:
 - Copy reescrito para un decisor no técnico (**Juan lo rechazó: quedó plano y sin tensión.
   Pendiente de rehacer con el número mandando desde el primer pantallazo**).
 - Aviso de privacidad.
+- Envío de leads por correo (`src/lib/lead-notify.ts`, server function `notifyLead`).
+  Se dispara al abrir la bóveda y al confirmar cita, manda a juancamilo@cupperlab.com
+  vía Resend. Sin `RESEND_API_KEY` en el servidor, no manda nada: solo deja un
+  `console.warn` con el lead. `syncLead()` sigue escribiendo en localStorage además
+  (sirve para probar `/admin` en el propio navegador), pero ya no es la única vía.
+- Validación de `/admin` movida a servidor (`src/lib/admin-auth.ts`). El código ya no
+  vive en el bundle del cliente; el servidor lo compara contra `ADMIN_ACCESS_CODE` y
+  guarda la sesión en una cookie firmada (`ADMIN_SESSION_SECRET`). Sin esas dos
+  variables de entorno, cae a un valor de desarrollo (`IPVAULT-DEMO`) que solo vive en
+  el bundle del servidor, nunca en el del cliente (verificado con build + grep sobre
+  `.output/public`).
 
 Abierto:
-- **Los leads no llegan a ningún sitio.** `syncLead()` escribe en el `localStorage` del
-  navegador del prospecto y `/admin` lee el del propio Juan. El panel nunca verá un lead
-  real. Decisión tomada: mandarlos por correo a juancamilo@cupperlab.com. Falta
-  implementarlo y necesita una API key de envío en el servidor.
-- **`/admin` tiene la contraseña en el bundle** (`DEMO_ACCESS_CODE = "IPVAULT-DEMO"`).
-  No publicar `/admin` hasta que la validación sea de servidor.
-- Lovable no inyecta secretos en apps TanStack Start sin Lovable Cloud, así que los dos
-  puntos anteriores dependen de decidir el despliegue.
+- **Las dos cosas de arriba necesitan las variables de entorno puestas en el servidor
+  de producción** (`RESEND_API_KEY`, `LEAD_NOTIFY_FROM` opcional, `ADMIN_ACCESS_CODE`,
+  `ADMIN_SESSION_SECRET`) para dejar de depender de los valores de desarrollo. Sigue
+  sin decidirse el despliegue (Lovable Cloud vs. salir a Cloudflare directo), así que
+  sigue sin decidirse dónde se ponen esas variables.
 - Badge «Edit with Lovable» visible en producción, con el ID del proyecto.
 - Cero tracking. No se sabe quién abre cada enlace de outbound.
 - El dominio `*.lovable.app` contradice el discurso. Debería acabar en cupperlab.com.

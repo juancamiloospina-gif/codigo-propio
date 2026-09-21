@@ -24,6 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { checkAdminSession, unlockAdmin } from "@/lib/admin-auth";
 import { SAAS_TOOLS } from "@/lib/ip-vault";
 import {
   buildOutboundUrl,
@@ -44,25 +45,46 @@ export const Route = createFileRoute("/admin")({
   component: AdminRoute,
 });
 
-const ADMIN_SESSION_KEY = "ip-vault-admin-demo-access";
-const DEMO_ACCESS_CODE = "IPVAULT-DEMO";
-
 function AdminRoute() {
   const [authorized, setAuthorized] = useState(false);
+  const [checking, setChecking] = useState(true);
   const [accessCode, setAccessCode] = useState("");
+  const [error, setError] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    setAuthorized(window.sessionStorage.getItem(ADMIN_SESSION_KEY) === "granted");
+    checkAdminSession()
+      .then((result) => setAuthorized(result.authorized))
+      .catch(() => setAuthorized(false))
+      .finally(() => setChecking(false));
   }, []);
 
-  function unlock(event: FormEvent) {
+  async function unlock(event: FormEvent) {
     event.preventDefault();
-    if (accessCode.trim().toUpperCase() !== DEMO_ACCESS_CODE) return;
-    window.sessionStorage.setItem(ADMIN_SESSION_KEY, "granted");
-    setAuthorized(true);
+    setSubmitting(true);
+    setError(false);
+    try {
+      const result = await unlockAdmin({ data: { code: accessCode } });
+      if (result.authorized) setAuthorized(true);
+      else setError(true);
+    } catch {
+      setError(true);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
-  if (!authorized) return <AdminGate code={accessCode} setCode={setAccessCode} unlock={unlock} />;
+  if (checking) return null;
+  if (!authorized)
+    return (
+      <AdminGate
+        code={accessCode}
+        setCode={setAccessCode}
+        unlock={unlock}
+        error={error}
+        submitting={submitting}
+      />
+    );
   return <AdminDashboard />;
 }
 
@@ -70,10 +92,14 @@ function AdminGate({
   code,
   setCode,
   unlock,
+  error,
+  submitting,
 }: {
   code: string;
   setCode: (value: string) => void;
   unlock: (event: FormEvent) => void;
+  error: boolean;
+  submitting: boolean;
 }) {
   return (
     <main className="grid min-h-[calc(100vh-3.5rem)] place-items-center px-5 py-16">
@@ -90,19 +116,19 @@ function AdminGate({
           Esta vista contiene datos comerciales guardados localmente en el navegador.
         </p>
         <label className="mt-6 block text-left text-xs text-muted-foreground">
-          Código de acceso de demostración
+          Código de acceso
           <Input
             className="mt-2 h-11 font-mono uppercase"
             value={code}
             onChange={(event) => setCode(event.target.value)}
-            placeholder="IPVAULT-DEMO"
+            placeholder="Código de acceso"
             autoComplete="off"
           />
         </label>
-        <Button type="submit" className="mt-4 w-full" size="lg">
-          <KeyRound className="size-4" /> Entrar al panel
+        {error && <p className="mt-2 text-left text-xs text-danger-soft">Código incorrecto.</p>}
+        <Button type="submit" className="mt-4 w-full" size="lg" disabled={submitting}>
+          <KeyRound className="size-4" /> {submitting ? "Comprobando..." : "Entrar al panel"}
         </Button>
-        <p className="mt-4 font-mono text-[10px] text-muted-foreground">DEMO: {DEMO_ACCESS_CODE}</p>
       </form>
     </main>
   );

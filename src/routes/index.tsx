@@ -14,7 +14,6 @@ import {
   Database,
   Download,
   Eye,
-  ExternalLink,
   FileCode2,
   Folder,
   Gauge,
@@ -48,6 +47,7 @@ import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { IpTransferContract } from "@/components/ip-vault/ip-transfer-contract";
+import { PrivacyNotice } from "@/components/ip-vault/privacy-notice";
 import { SchedulingModal } from "@/components/ip-vault/scheduling-modal";
 import { useIpVaultState } from "@/hooks/use-ip-vault-state";
 import {
@@ -57,6 +57,7 @@ import {
   type Appointment,
   type Prospect,
 } from "@/lib/ip-vault";
+import { notifyLead } from "@/lib/lead-notify";
 import { cn } from "@/lib/utils";
 
 const searchSchema = z.object({
@@ -106,6 +107,7 @@ function IpVault() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [captureOpen, setCaptureOpen] = useState(false);
   const [schedulingOpen, setSchedulingOpen] = useState(false);
+  const [privacyOpen, setPrivacyOpen] = useState(false);
 
   useEffect(() => {
     if (!simulating || logCount >= logs.length) return;
@@ -139,9 +141,35 @@ function IpVault() {
       () => document.querySelector("#boveda")?.scrollIntoView({ behavior: "smooth" }),
       80,
     );
+    notifyLead({
+      data: {
+        event: "boveda_abierta",
+        company,
+        domain: state.domain,
+        outboundKey: state.outboundKey,
+        prospect: result.data,
+        selected: state.selected,
+        users: state.users,
+        years: state.years,
+        appointment: null,
+      },
+    }).catch((error) => console.error("[ip-vault] No se pudo notificar el lead", error));
   }
   function confirmAppointment(appointment: Appointment) {
     dispatch({ type: "schedule", appointment, now: Date.now() });
+    notifyLead({
+      data: {
+        event: "cita_agendada",
+        company,
+        domain: state.domain,
+        outboundKey: state.outboundKey,
+        prospect: state.prospect,
+        selected: state.selected,
+        users: state.users,
+        years: state.years,
+        appointment: { startsAt: appointment.startsAt, timezone: appointment.timezone },
+      },
+    }).catch((error) => console.error("[ip-vault] No se pudo notificar el lead", error));
   }
 
   return (
@@ -163,12 +191,13 @@ function IpVault() {
             <ShieldCheck className="size-3.5" /> PROTOCOLO DE SOBERANÍA TECNOLÓGICA
           </div>
           <h1 className="max-w-5xl text-4xl font-extrabold leading-[1.08] sm:text-6xl lg:text-7xl">
-            Reclama la propiedad de tu código.{" "}
-            <span className="text-primary">Elimina el alquiler SaaS.</span>
+            Transforma el alquiler SaaS en{" "}
+            <span className="text-primary">patrimonio digital propio.</span>
           </h1>
           <p className="mt-7 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
-            Analiza el costo de dependencia de tu empresa, simula la creación de tu sistema propio y
-            libera tu repositorio Git.
+            Audita la fuga de capital de tu empresa en licencias perpetuas, simula la arquitectura
+            de tu software propietario y toma posesión total del código fuente sin pagar rentas
+            mensuales.
           </p>
           <div className="mt-10 flex max-w-3xl flex-col gap-3 rounded-lg border border-border bg-card/70 p-2 backdrop-blur-xl sm:flex-row">
             <label className="flex min-w-0 flex-1 items-center gap-3 px-3">
@@ -183,7 +212,7 @@ function IpVault() {
               />
             </label>
             <Button size="lg" onClick={startAudit}>
-              Iniciar Auditoría <ArrowRight className="size-4" />
+              Iniciar Auditoría Financiera <ArrowRight className="size-4" />
             </Button>
           </div>
         </div>
@@ -350,6 +379,8 @@ function IpVault() {
               appointment={state.appointment}
               repositoryUnlocked={state.repositoryUnlocked}
               onSchedule={() => setSchedulingOpen(true)}
+              selected={state.selected}
+              users={state.users}
             />
           ) : (
             <div className="glass-panel mt-12 grid min-h-80 place-items-center rounded-lg border-primary/30 p-8 text-center">
@@ -376,7 +407,13 @@ function IpVault() {
         <Logo />
         <p>© 2026 IP Vault · Código soberano, por diseño.</p>
         <div className="flex gap-5">
-          <span>Privacidad</span>
+          <button
+            type="button"
+            className="hover:text-foreground"
+            onClick={() => setPrivacyOpen(true)}
+          >
+            Privacidad
+          </button>
           <span>Protocolo</span>
           <span>Seguridad</span>
         </div>
@@ -388,6 +425,7 @@ function IpVault() {
           setProspect={(prospect) => dispatch({ type: "set-prospect", prospect })}
           onClose={() => setCaptureOpen(false)}
           onSubmit={capture}
+          onOpenPrivacy={() => setPrivacyOpen(true)}
         />
       )}
       <SchedulingModal
@@ -397,6 +435,7 @@ function IpVault() {
         prospect={state.prospect}
         onConfirm={confirmAppointment}
       />
+      <PrivacyNotice open={privacyOpen} onClose={() => setPrivacyOpen(false)} />
     </main>
   );
 }
@@ -866,13 +905,16 @@ function CaptureModal({
   setProspect,
   onClose,
   onSubmit,
+  onOpenPrivacy,
 }: {
   company: string;
   prospect: Prospect;
   setProspect: (p: Prospect) => void;
   onClose: () => void;
   onSubmit: (e: FormEvent) => void;
+  onOpenPrivacy: () => void;
 }) {
+  const [privacyAccepted, setPrivacyAccepted] = useState(false);
   const input =
     "h-11 w-full rounded-md border border-input bg-background px-3 text-sm outline-hidden focus:ring-2 focus:ring-ring";
   return (
@@ -960,7 +1002,25 @@ function CaptureModal({
             />
           </label>
         </div>
-        <Button type="submit" className="mt-6 w-full" size="lg">
+        <label className="mt-5 flex items-start gap-2.5 text-xs leading-5 text-muted-foreground">
+          <input
+            required
+            type="checkbox"
+            checked={privacyAccepted}
+            onChange={(e) => setPrivacyAccepted(e.target.checked)}
+            className="mt-0.5 size-4 shrink-0 accent-primary"
+          />
+          Acepto los términos de procesamiento de datos corporativos y{" "}
+          <button
+            type="button"
+            className="underline underline-offset-2 hover:text-foreground"
+            onClick={onOpenPrivacy}
+          >
+            política de privacidad
+          </button>
+          .
+        </label>
+        <Button type="submit" className="mt-4 w-full" size="lg" disabled={!privacyAccepted}>
           Verificar y abrir bóveda <ArrowRight className="size-4" />
         </Button>
       </form>
@@ -974,12 +1034,16 @@ function Vault({
   appointment,
   repositoryUnlocked,
   onSchedule,
+  selected,
+  users,
 }: {
   company: string;
   time: string;
   appointment: Appointment | null;
   repositoryUnlocked: boolean;
   onSchedule: () => void;
+  selected: string[];
+  users: number;
 }) {
   return (
     <div className="glass-panel relative mt-12 overflow-hidden rounded-lg border-primary/50 shadow-[var(--shadow-primary)]">
@@ -1032,14 +1096,16 @@ function Vault({
             </div>
           )}
           {repositoryUnlocked ? (
-            <a
-              href={`https://github.com/ip-vault-private/${projectSlug(company)}-core-platform`}
-              target="_blank"
-              rel="noreferrer"
-              className="mx-auto mt-8 inline-flex h-11 w-full max-w-md items-center justify-center gap-2 rounded-md bg-primary px-5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
-            >
-              <ExternalLink className="size-4" /> Abrir repositorio privado simbólico
-            </a>
+            <div className="mx-auto mt-8 w-full max-w-md rounded-md border border-primary/30 bg-primary/5 px-5 py-4">
+              <p className="font-mono text-[10px] text-primary">IDENTIFICADOR DE BÓVEDA</p>
+              <p className="mt-2 flex items-center justify-center gap-2 break-all font-mono text-sm text-primary">
+                <LockKeyhole className="size-4 shrink-0" />
+                ip-vault://{projectSlug(company)}-sovereign-core
+              </p>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Acceso confirmado. Un Lead Architect prepara la entrega del repositorio.
+              </p>
+            </div>
           ) : (
             <Button className="mt-8 w-full max-w-md" size="lg" onClick={onSchedule}>
               <KeyRound className="size-4" />
@@ -1047,12 +1113,20 @@ function Vault({
             </Button>
           )}
         </div>
-        <CodeTree />
+        <CodeTree company={company} selected={selected} users={users} />
       </div>
     </div>
   );
 }
-function CodeTree() {
+function CodeTree({
+  company,
+  selected,
+  users,
+}: {
+  company: string;
+  selected: string[];
+  users: number;
+}) {
   const [open, setOpen] = useState(["src", "config"]);
   const folders = [
     { name: "src", children: ["app.tsx", "modules", "services"] },
@@ -1063,12 +1137,17 @@ function CodeTree() {
   ];
   return (
     <div className="p-6 sm:p-8">
-      <div className="mb-5 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <GitBranch className="size-4 text-cyan" />
-          <span className="font-mono text-xs">main</span>
+      <p className="font-mono text-[10px] text-cyan">
+        ESTRUCTURA DE ARQUITECTURA MODULAR PROPIETARIA
+      </p>
+      <div className="mb-5 mt-3 flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2">
+          <GitBranch className="size-4 shrink-0 text-cyan" />
+          <span className="truncate font-mono text-xs">main</span>
         </div>
-        <span className="font-mono text-[10px] text-muted-foreground">SHA 7f2a9c1</span>
+        <span className="truncate font-mono text-[10px] text-muted-foreground">
+          ip-vault://{projectSlug(company)}-sovereign-core
+        </span>
       </div>
       <div className="rounded-md border border-border bg-background/50 p-3 font-mono text-xs">
         {folders.map((folder) => {
@@ -1100,9 +1179,13 @@ function CodeTree() {
         })}
       </div>
       <div className="mt-5 grid grid-cols-3 gap-3 text-center">
-        <MiniStat icon={Layers3} value="247" label="archivos" />
-        <MiniStat icon={Database} value="38" label="tablas" />
-        <MiniStat icon={Server} value="12" label="servicios" />
+        <MiniStat icon={Layers3} value={String(folders.length)} label="módulos" />
+        <MiniStat
+          icon={Database}
+          value={String(selected.length)}
+          label="integraciones sustituidas"
+        />
+        <MiniStat icon={Server} value={users.toLocaleString()} label="usuarios con acceso" />
       </div>
     </div>
   );

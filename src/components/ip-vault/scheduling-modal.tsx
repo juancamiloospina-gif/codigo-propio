@@ -82,8 +82,8 @@ export function SchedulingModal({
             </div>
             <DialogTitle className="text-2xl">Sesión de arquitectura para {company}</DialogTitle>
             <DialogDescription>
-              Reserva 20 minutos con un Ingeniero de Software Principal. No se enviará ninguna
-              notificación real en esta demostración.
+              Reserva 20 minutos con un Lead Architect. Confirmamos la cita por tu correo
+              corporativo.
             </DialogDescription>
           </DialogHeader>
           <div className="mt-5 grid grid-cols-2 gap-2 text-xs">
@@ -172,10 +172,11 @@ export function SchedulingModal({
             <span className="mx-auto grid size-14 place-items-center rounded-full bg-primary/10 text-primary">
               <MailCheck className="size-7" />
             </span>
-            <h3 className="mt-5 text-2xl font-bold">Sesión confirmada</h3>
+            <h3 className="mt-5 text-2xl font-bold">Sesión de Arquitectura Solicitada</h3>
             <p className="mx-auto mt-3 max-w-md text-sm leading-6 text-muted-foreground">
-              Notificación simulada enviada a {prospect.email || "tu correo corporativo"}. La bóveda
-              recibió 48 horas adicionales de acceso.
+              Un Lead Architect se comunicará a {prospect.email || "tu correo corporativo"} en menos
+              de 2 horas hábiles para confirmar la agenda. La bóveda recibió 48 horas adicionales de
+              acceso.
             </p>
             <Button className="mt-6" onClick={() => onOpenChange(false)}>
               Ver repositorio desbloqueado
@@ -194,8 +195,8 @@ export function SchedulingModal({
             </div>
             <div className="mt-5 flex items-start gap-3 rounded-md border border-border p-4 text-sm text-muted-foreground">
               <Check className="mt-0.5 size-4 shrink-0 text-primary" />
-              Al confirmar, IP Vault simulará el envío de la invitación y ampliará el acceso al
-              repositorio durante 48 horas.
+              Al confirmar, tu solicitud llega a un Lead Architect y el acceso al repositorio se
+              amplía 48 horas.
             </div>
             <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
               <Button variant="outline" onClick={() => setStep(1)}>

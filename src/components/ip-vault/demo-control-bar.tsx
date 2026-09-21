@@ -1,6 +1,14 @@
+import { useLocation } from "@tanstack/react-router";
 import { ExternalLink, LayoutDashboard, MonitorSmartphone } from "lucide-react";
 
 export function DemoControlBar() {
+  // El prospecto nunca debe ver esta barra: ni con un enlace de outbound abierto
+  // (company/domain en la URL) ni en producción, aunque no lleve parámetros.
+  const search = useLocation({ select: (location) => location.search }) as Record<string, unknown>;
+  const hasOutboundParams = Boolean(search["company"]) || Boolean(search["domain"]);
+  const isProduction = process.env["NODE_ENV"] === "production";
+  if (hasOutboundParams || isProduction) return null;
+
   return (
     <aside
       className="fixed inset-x-0 bottom-0 z-[70] border-t border-primary/25 bg-background/95 px-3 py-2 shadow-[0_-12px_40px_rgba(0,0,0,.35)] backdrop-blur-xl"
