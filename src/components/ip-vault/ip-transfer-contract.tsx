@@ -58,7 +58,7 @@ export function IpTransferContract({ company, domain }: { company: string; domai
               <div className="flex items-center gap-3">
                 <FileKey2 className="size-5 text-emerald-700" />
                 <div>
-                  <p className="text-xs font-bold tracking-[.18em]">IP VAULT LEGAL</p>
+                  <p className="text-xs font-bold tracking-[.18em]">CUPPERLAB</p>
                   <p className="text-[10px] text-black/50">BORRADOR · V1.0</p>
                 </div>
               </div>
@@ -75,7 +75,7 @@ export function IpTransferContract({ company, domain }: { company: string; domai
               </h3>
               <div className="mx-auto my-7 h-px max-w-md bg-black/15" />
               <p className="font-serif text-sm leading-7">
-                Entre <strong>IP Vault Agency</strong>, en adelante “La Agencia”, y{" "}
+                Entre <strong>Cupperlab</strong>, en adelante “La Agencia”, y{" "}
                 <strong>{company}</strong>, asociado al dominio{" "}
                 <strong>{domain || "por definir"}</strong>, en adelante “El Cliente”, se establecen
                 las siguientes garantías:
@@ -91,8 +91,8 @@ export function IpTransferContract({ company, domain }: { company: string; domai
                 ))}
               </ol>
               <div className="mt-8 flex items-center gap-2 border-t border-black/10 pt-5 text-xs text-black/55">
-                <CheckCircle2 className="size-4 text-emerald-700" /> Documento de trabajo sujeto a
-                revisión legal y firma de las partes.
+                <CheckCircle2 className="size-4 text-emerald-700" /> Borrador orientativo. El
+                acuerdo que se firma lo revisan los abogados de las dos partes.
               </div>
             </div>
             <div className="border-t border-black/10 bg-black/[.025] p-5">
