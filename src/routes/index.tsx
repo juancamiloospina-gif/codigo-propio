@@ -184,46 +184,75 @@ function IpVault() {
   return (
     <main className="min-h-screen overflow-hidden bg-background text-foreground selection:bg-primary/30">
       <Header mobileOpen={mobileOpen} setMobileOpen={setMobileOpen} startAudit={startAudit} />
-      <section className="relative mx-auto flex min-h-[680px] max-w-7xl flex-col justify-center px-5 pb-20 pt-32 sm:px-8 lg:px-12">
-        <div className="pointer-events-none absolute left-1/2 top-10 h-80 w-80 -translate-x-1/2 rounded-full bg-primary/20 blur-3xl" />
-        <div className="pointer-events-none absolute right-0 top-52 h-64 w-64 rounded-full bg-cyan/15 blur-3xl" />
-        <div className="relative max-w-5xl rounded-2xl border border-white/10 bg-slate-900/60 p-6 backdrop-blur-xl sm:p-10 lg:p-12">
-          {outbound && (
-            <div className="mb-6 inline-flex max-w-full items-center gap-3 rounded-2xl border border-white/10 bg-black/20 py-2 pl-2 pr-4">
-              <ProspectAvatar company={company} domain={state.domain} />
-              <span className="text-xs font-medium leading-snug text-cyan sm:text-sm">
-                Auditoría Financiera Personalizada para{" "}
-                <strong className="text-foreground">{company}</strong>
-              </span>
+      <section className="relative mx-auto flex min-h-[680px] max-w-7xl flex-col justify-center overflow-hidden px-5 pb-20 pt-32 sm:px-8 lg:px-12">
+        {/* Mesh gradient: varios glows radiales de marca, nunca filter:blur en el propio gradiente */}
+        <div className="pointer-events-none absolute inset-0 -z-10">
+          <div className="glow-cyan drift-slow absolute left-[8%] top-0 h-128 w-lg" />
+          <div className="glow-orange absolute right-[-6%] top-40 h-96 w-96" />
+          <div className="glow-cyan absolute bottom-[-10%] left-[35%] h-80 w-80 opacity-70" />
+          {/* Partículas de luz sutiles */}
+          {[
+            "left-[18%] top-[22%] size-1 bg-cyan/70",
+            "left-[42%] top-[12%] size-1.5 bg-cyan/50",
+            "left-[63%] top-[30%] size-1 bg-orange/60",
+            "left-[28%] top-[46%] size-1 bg-cyan/40",
+            "left-[74%] top-[18%] size-1.5 bg-cyan/60",
+            "left-[52%] top-[52%] size-1 bg-orange/40",
+          ].map((cls, i) => (
+            <i key={i} className={cn("drift-slow absolute rounded-full", cls)} />
+          ))}
+        </div>
+        <div className="relative grid gap-10 lg:grid-cols-[1.05fr_.95fr] lg:items-center">
+          <div className="relative max-w-5xl rounded-2xl border border-white/10 bg-obsidian/60 p-6 backdrop-blur-xl sm:p-10 lg:p-12">
+            {outbound && (
+              <div className="mb-6 inline-flex max-w-full items-center gap-3 rounded-2xl border border-white/10 bg-black/20 py-2 pl-2 pr-4">
+                <ProspectAvatar company={company} domain={state.domain} />
+                <span className="text-xs font-medium leading-snug text-cyan sm:text-sm">
+                  Auditoría Financiera Personalizada para{" "}
+                  <strong className="text-foreground">{company}</strong>
+                </span>
+              </div>
+            )}
+            <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 font-mono text-xs text-primary">
+              <ShieldCheck className="size-3.5" /> PROTOCOLO DE SOBERANÍA TECNOLÓGICA
             </div>
-          )}
-          <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 font-mono text-xs text-primary">
-            <ShieldCheck className="size-3.5" /> PROTOCOLO DE SOBERANÍA TECNOLÓGICA
+            <h1 className="text-4xl font-extrabold leading-[1.08] sm:text-6xl lg:text-7xl">
+              Reemplazamos tus licencias SaaS por{" "}
+              <span className="text-primary">tu propio software a la medida.</span>
+            </h1>
+            <p className="mt-7 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
+              Diseñamos y desarrollamos la plataforma interna que tu empresa necesita, te entregamos
+              el 100% del código fuente y eliminamos las rentas mensuales por usuario para siempre.
+            </p>
+            <div className="mt-10 flex max-w-3xl flex-col gap-3 rounded-lg border border-white/10 bg-black/20 p-2 sm:flex-row">
+              <label className="flex min-w-0 flex-1 items-center gap-3 px-3">
+                <Globe2 className="size-5 shrink-0 text-cyan" />
+                <span className="sr-only">Dominio de tu empresa</span>
+                <input
+                  value={state.domain}
+                  onChange={(e) => dispatch({ type: "set-domain", domain: e.target.value })}
+                  onKeyDown={(e) => e.key === "Enter" && startAudit()}
+                  placeholder="Dominio de tu empresa (ej. acme.com)"
+                  className="h-12 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                />
+              </label>
+              <Button
+                size="lg"
+                onClick={startAudit}
+                className="bg-orange text-[#0b1016] shadow-[0_0_28px_rgb(244_100_52/35%)] hover:bg-orange/90"
+              >
+                Calcular Mi Ahorro Financiero <ArrowRight className="size-4" />
+              </Button>
+            </div>
           </div>
-          <h1 className="text-4xl font-extrabold leading-[1.08] sm:text-6xl lg:text-7xl">
-            Reemplazamos tus licencias SaaS por{" "}
-            <span className="text-primary">tu propio software a la medida.</span>
-          </h1>
-          <p className="mt-7 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
-            Diseñamos y desarrollamos la plataforma interna que tu empresa necesita, te entregamos
-            el 100% del código fuente y eliminamos las rentas mensuales por usuario para siempre.
-          </p>
-          <div className="mt-10 flex max-w-3xl flex-col gap-3 rounded-lg border border-white/10 bg-black/20 p-2 sm:flex-row">
-            <label className="flex min-w-0 flex-1 items-center gap-3 px-3">
-              <Globe2 className="size-5 shrink-0 text-cyan" />
-              <span className="sr-only">Dominio de tu empresa</span>
-              <input
-                value={state.domain}
-                onChange={(e) => dispatch({ type: "set-domain", domain: e.target.value })}
-                onKeyDown={(e) => e.key === "Enter" && startAudit()}
-                placeholder="Dominio de tu empresa (ej. acme.com)"
-                className="h-12 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-              />
-            </label>
-            <Button size="lg" onClick={startAudit}>
-              Calcular Mi Ahorro Financiero <ArrowRight className="size-4" />
-            </Button>
-          </div>
+          <HeroMockup
+            company={company}
+            domain={state.domain}
+            savingsPercent={tco.savingsPercent}
+            sovereignty={tco.sovereignty}
+            users={state.users}
+            chartData={tco.chartData}
+          />
         </div>
       </section>
 
@@ -238,7 +267,7 @@ function IpVault() {
             text="Modela la exposición financiera acumulada y descubre cuánto capital permanece atrapado en licencias."
           />
           <div className="mt-12 grid gap-6 lg:grid-cols-[1.12fr_.88fr]">
-            <div className="rounded-2xl border border-white/10 bg-slate-900/60 p-5 backdrop-blur-xl sm:p-7">
+            <div className="rounded-2xl border border-white/10 bg-obsidian/60 p-5 backdrop-blur-xl sm:p-7">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold">Stack SaaS actual</h3>
                 <span className="font-mono text-xs text-muted-foreground">
@@ -292,8 +321,8 @@ function IpVault() {
                 />
               </div>
             </div>
-            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-slate-900/60 p-5 backdrop-blur-xl sm:p-7">
-              <div className="pointer-events-none absolute -right-14 -top-14 h-52 w-52 rounded-full bg-emerald-500/25 blur-3xl" />
+            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-obsidian/60 p-5 backdrop-blur-xl sm:p-7">
+              <div className="pointer-events-none absolute -right-14 -top-14 h-52 w-52 rounded-full bg-orange/25 blur-3xl" />
               <div className="pointer-events-none absolute -bottom-10 -left-10 h-44 w-44 rounded-full bg-cyan/20 blur-3xl" />
               <div className="relative">
                 <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-primary to-transparent" />
@@ -302,7 +331,7 @@ function IpVault() {
                   <p className="text-sm text-muted-foreground">
                     Pérdida patrimonial acumulada en {state.years} años
                   </p>
-                  <p className="mt-2 text-5xl font-extrabold tabular-nums text-emerald-400 drop-shadow-[0_0_28px_rgba(52,211,153,0.45)] transition-all duration-300 sm:text-6xl">
+                  <p className="mt-2 text-5xl font-extrabold tabular-nums text-primary drop-shadow-[0_0_28px_rgba(28,188,228,0.45)] transition-all duration-300 sm:text-6xl">
                     ${lossDisplay.toLocaleString("en-US")}
                   </p>
                   <p className="mt-2 font-mono text-xs text-muted-foreground">
@@ -403,9 +432,20 @@ function IpVault() {
               users={state.users}
             />
           ) : (
-            <div className="glass-panel mt-12 grid min-h-80 place-items-center rounded-lg border-primary/30 p-8 text-center">
-              <div>
-                <LockKeyhole className="mx-auto size-10 text-primary" />
+            <div className="relative mt-12 grid min-h-80 place-items-center overflow-hidden rounded-2xl border border-primary/30 p-8 text-center">
+              <div
+                className="absolute inset-0 bg-cover bg-center opacity-20"
+                style={{
+                  backgroundImage:
+                    "url(https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=60)",
+                }}
+              />
+              <div className="absolute inset-0 bg-obsidian-deep/80 backdrop-blur-xl" />
+              <div className="glow-cyan absolute inset-0" />
+              <div className="relative">
+                <span className="mx-auto grid size-16 place-items-center rounded-full border border-primary/40 bg-primary/10 shadow-[0_0_32px_rgb(28_188_228/35%)]">
+                  <LockKeyhole className="size-7 text-primary" />
+                </span>
                 <h3 className="mt-5 text-2xl font-bold">
                   {vaultExpired ? "La reserva ha vencido" : "Bóveda protegida"}
                 </h3>
@@ -422,9 +462,23 @@ function IpVault() {
           )}
         </div>
       </section>
+      <ProofSection />
       <IpTransferContract company={company} domain={state.domain} />
       <footer className="mx-auto flex max-w-7xl flex-col gap-4 px-5 py-10 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-12">
-        <Logo />
+        <div className="flex items-center gap-4">
+          <Logo />
+          <span className="h-6 w-px bg-white/10" />
+          <span className="flex items-center gap-2">
+            Un producto de
+            <img
+              src="/brand/cupperlab-logo.png"
+              alt="Cupperlab"
+              width={112}
+              height={23}
+              className="h-4.5 w-auto object-contain"
+            />
+          </span>
+        </div>
         <p>© 2026 IP Vault · Código soberano, por diseño.</p>
         <div className="flex gap-5">
           <button
@@ -589,6 +643,75 @@ function ProspectAvatar({
   );
 }
 
+// Mockup en perspectiva ligera del hero: no es una foto de stock genérica,
+// muestra datos reales de esta auditoría (favicon del dominio, ahorro
+// proyectado, soberanía, la misma curva del gráfico de la sección 01).
+function HeroMockup({
+  company,
+  domain,
+  savingsPercent,
+  sovereignty,
+  users,
+  chartData,
+}: {
+  company: string;
+  domain: string;
+  savingsPercent: number;
+  sovereignty: number;
+  users: number;
+  chartData: { own: number }[];
+}) {
+  const maxOwn = Math.max(1, ...chartData.map((d) => d.own));
+  return (
+    <div className="hidden perspective-[1800px] lg:block">
+      <div className="rounded-2xl border border-white/10 bg-obsidian/80 shadow-2xl backdrop-blur-xl transition-transform duration-500 transform-[rotateY(-10deg)_rotateX(5deg)_rotateZ(1deg)] hover:transform-[rotateY(-4deg)_rotateX(2deg)]">
+        <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
+          <div className="flex shrink-0 gap-1.5">
+            <i className="size-2 rounded-full bg-red-500" />
+            <i className="size-2 rounded-full bg-amber-400" />
+            <i className="size-2 rounded-full bg-emerald-500" />
+          </div>
+          <span className="ml-2 truncate font-mono text-[10px] text-muted-foreground">
+            {(domain || `${projectSlug(company)}.io`).toLowerCase()}/dashboard
+          </span>
+        </div>
+        <div className="p-5">
+          <div className="flex items-center gap-2.5">
+            <ProspectAvatar company={company} domain={domain} className="size-8 rounded p-1" />
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold">{company}</p>
+              <p className="font-mono text-[10px] text-cyan">SISTEMA PROPIO · EN DISEÑO</p>
+            </div>
+          </div>
+          <div className="mt-5 rounded-lg border border-white/10 bg-black/20 p-4">
+            <p className="text-[11px] text-muted-foreground">Ahorro proyectado a 5 años</p>
+            <p className="mt-1 text-3xl font-bold text-primary">{savingsPercent}%</p>
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-3">
+            <div className="rounded-lg border border-white/10 bg-black/20 p-3">
+              <p className="text-[10px] text-muted-foreground">Soberanía IP</p>
+              <p className="mt-1 text-lg font-bold text-cyan">{sovereignty}%</p>
+            </div>
+            <div className="rounded-lg border border-white/10 bg-black/20 p-3">
+              <p className="text-[10px] text-muted-foreground">Usuarios</p>
+              <p className="mt-1 text-lg font-bold">{users.toLocaleString()}</p>
+            </div>
+          </div>
+          <div className="mt-4 flex h-16 items-end gap-1.5">
+            {chartData.map((point, i) => (
+              <div
+                key={i}
+                className="flex-1 rounded-t-sm bg-primary/50"
+                style={{ height: `${Math.max(6, (point.own / maxOwn) * 100)}%` }}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const SAAS_RISKS = [
   "Pagos mensuales por usuario",
   "Subidas de precio unilaterales",
@@ -611,30 +734,109 @@ function ComparisonModule() {
           <h2 className="mt-3 text-3xl font-bold sm:text-4xl">Dos caminos para tu tecnología</h2>
         </div>
         <div className="mt-10 grid gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 md:grid-cols-2">
-          <div className="bg-slate-900/70 p-6 backdrop-blur-xl sm:p-8">
-            <p className="font-mono text-xs text-danger-soft">RIESGO</p>
-            <h3 className="mt-2 text-xl font-bold">Arriendo SaaS Perpetuo</h3>
-            <ul className="mt-6 space-y-4">
-              {SAAS_RISKS.map((risk) => (
-                <li key={risk} className="flex items-start gap-3 text-sm text-muted-foreground">
-                  <AlertTriangle className="mt-0.5 size-4 shrink-0 text-danger-soft" />
-                  {risk}
-                </li>
-              ))}
-            </ul>
+          <div className="relative overflow-hidden bg-obsidian p-6 sm:p-8">
+            <div
+              className="absolute inset-0 bg-cover bg-center opacity-25"
+              style={{
+                backgroundImage:
+                  "url(https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=900&q=60)",
+              }}
+            />
+            <div className="absolute inset-0 bg-linear-to-t from-obsidian via-obsidian/85 to-obsidian/40" />
+            <div className="relative">
+              <p className="font-mono text-xs text-danger-soft">RIESGO</p>
+              <h3 className="mt-2 text-xl font-bold">Arriendo SaaS Perpetuo</h3>
+              <ul className="relative mt-6 space-y-5">
+                <div className="absolute bottom-2 left-3.25 top-2 w-px bg-danger-soft/25" />
+                {SAAS_RISKS.map((risk) => (
+                  <li
+                    key={risk}
+                    className="relative flex items-start gap-3 text-sm text-muted-foreground"
+                  >
+                    <span className="relative z-10 grid size-7 shrink-0 place-items-center rounded-full border border-danger-soft/30 bg-obsidian">
+                      <AlertTriangle className="size-3.5 text-danger-soft" />
+                    </span>
+                    <span className="pt-1">{risk}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
-          <div className="bg-slate-900/70 p-6 backdrop-blur-xl sm:p-8">
-            <p className="font-mono text-xs text-primary">SOLUCIÓN</p>
-            <h3 className="mt-2 text-xl font-bold">Software Propio con Cupperlab</h3>
-            <ul className="mt-6 space-y-4">
-              {CUPPERLAB_BENEFITS.map((benefit) => (
-                <li key={benefit} className="flex items-start gap-3 text-sm">
-                  <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" />
-                  {benefit}
-                </li>
-              ))}
-            </ul>
+          <div className="relative overflow-hidden bg-obsidian p-6 sm:p-8">
+            <div
+              className="absolute inset-0 bg-cover bg-center opacity-25"
+              style={{
+                backgroundImage:
+                  "url(https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=900&q=60)",
+              }}
+            />
+            <div className="absolute inset-0 bg-linear-to-t from-obsidian via-obsidian/85 to-obsidian/40" />
+            <div className="relative">
+              <p className="font-mono text-xs text-primary">SOLUCIÓN</p>
+              <h3 className="mt-2 text-xl font-bold">Software Propio con Cupperlab</h3>
+              <ul className="relative mt-6 space-y-5">
+                <div className="absolute bottom-2 left-3.25 top-2 w-px bg-primary/25" />
+                {CUPPERLAB_BENEFITS.map((benefit) => (
+                  <li key={benefit} className="relative flex items-start gap-3 text-sm">
+                    <span className="relative z-10 grid size-7 shrink-0 place-items-center rounded-full border border-primary/30 bg-obsidian">
+                      <CheckCircle2 className="size-3.5 text-primary" />
+                    </span>
+                    <span className="pt-1">{benefit}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
+        </div>
+        <p className="mt-3 text-center text-[11px] text-muted-foreground">
+          Fotografías ilustrativas (Unsplash), no capturas de un cliente real.
+        </p>
+      </div>
+    </section>
+  );
+}
+
+// Prueba social honesta: en vez de testimonios de clientes que todavía no
+// existen (IP Vault no ha cerrado ningún proyecto real), muestra los
+// productos propios que Cupperlab ya construye y opera. Logos reales
+// (skill cupperlab-design, assets/products/), sin cifras de impacto
+// inventadas ni fotos de ejecutivos de stock haciéndose pasar por clientes.
+const CUPPERLAB_PRODUCTS = [
+  { name: "Ainoa", file: "ainoa.png" },
+  { name: "Captaleads", file: "captaleads.png" },
+  { name: "Zyraio", file: "zyraio.png" },
+  { name: "Cupperhub", file: "cupperhub.png" },
+];
+
+function ProofSection() {
+  return (
+    <section className="border-y border-border bg-card/20 py-20">
+      <div className="mx-auto max-w-7xl px-5 sm:px-8 lg:px-12">
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="font-mono text-xs text-cyan">QUIÉN ESTÁ DETRÁS</p>
+          <h2 className="mt-3 text-3xl font-bold sm:text-4xl">
+            Sistemas que ya construimos y operamos
+          </h2>
+          <p className="mt-4 text-sm leading-6 text-muted-foreground sm:text-base">
+            Cupperlab es una agencia de automatización e IA con productos propios en producción, no
+            solo entregables para terceros. El equipo que diseñaría tu sistema ya construyó estos.
+          </p>
+        </div>
+        <div className="mt-10 grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
+          {CUPPERLAB_PRODUCTS.map((product) => (
+            <div
+              key={product.name}
+              className="rounded-2xl border border-white/10 bg-obsidian/60 p-6 text-center backdrop-blur-xl"
+            >
+              <div className="mx-auto flex h-14 w-full items-center justify-center rounded-lg bg-white px-4">
+                <img
+                  src={`/brand/${product.file}`}
+                  alt={product.name}
+                  className="h-6 w-auto object-contain"
+                />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>
@@ -762,7 +964,7 @@ function ChartTooltipContent({
 }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-lg border border-white/10 bg-slate-900/90 p-3 shadow-2xl backdrop-blur-xl">
+    <div className="rounded-lg border border-white/10 bg-obsidian/90 p-3 shadow-2xl backdrop-blur-xl">
       <p className="mb-2 font-mono text-[10px] text-muted-foreground">{label}</p>
       <div className="space-y-1.5">
         {payload.map((entry) => (
@@ -789,7 +991,7 @@ function TcoChart({
   breakEvenPoint: string | null;
 }) {
   return (
-    <div className="mt-6 rounded-2xl border border-white/10 bg-slate-900/60 p-5 backdrop-blur-xl sm:p-7">
+    <div className="mt-6 rounded-2xl border border-white/10 bg-obsidian/60 p-5 backdrop-blur-xl sm:p-7">
       <div className="flex flex-col justify-between gap-3 sm:flex-row">
         <div>
           <p className="font-mono text-xs text-cyan">CURVA DE INVERSIÓN · 5 AÑOS</p>
@@ -969,7 +1171,7 @@ function PlatformPreview({
   }, [contentReady]);
 
   return (
-    <div className="mt-12 overflow-hidden rounded-2xl border border-white/10 bg-slate-900/80 shadow-2xl backdrop-blur-xl">
+    <div className="mt-12 overflow-hidden rounded-2xl border border-white/10 bg-obsidian/80 shadow-2xl backdrop-blur-xl">
       <div className="flex items-center gap-3 border-b border-white/10 px-4 py-3">
         <div className="flex shrink-0 gap-1.5">
           <i className="size-2.5 rounded-full bg-red-500" />
@@ -1128,7 +1330,7 @@ function PlatformWidget({
   children: ReactNode;
 }) {
   return (
-    <div className={cn("rounded-xl border border-white/10 bg-slate-950/40 p-5", className)}>
+    <div className={cn("rounded-xl border border-white/10 bg-obsidian-deep/40 p-5", className)}>
       <div className="mb-4 flex items-center gap-2.5">
         <span className="grid size-8 shrink-0 place-items-center rounded-md bg-cyan/10 text-cyan">
           <Icon className="size-4" />
